@@ -1,14 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 using System;
 using System.IO;
 using System.Net;
 using Newtonsoft.Json.Linq;
 
+using ChannelManager;
+
 public class debug_pannel : MonoBehaviour
 {
+    public Text gqs_text;
+    int a = 0;
     // Start is called before the first frame update
     void Start()
     {
@@ -18,7 +23,34 @@ public class debug_pannel : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        gqs_text.text = String.Format("{0}, {1}", AreaManager.instance.current_Lat, AreaManager.instance.current_Long);
+    }
+
+    public void top_channel_update()
+    {
+        ChannelManager.ChannelManager.instance.top_channel_update();
+    }
+
+    public void button_all_set_active(bool acive)
+    {
+        GameObject[] btn_array = Channel_panel.instance.btn_array;
+        for (int i=0; i<btn_array.Length; i++)
+        {
+            if (btn_array[i]!=null)
+            {
+                btn_array[i].SetActive(acive);
+            }
+        }
+    }
+
+    public void channel_is_selected()
+    {
+        var a = ChannelManager.ChannelManager.instance.channel_set;
+        Debug.Log(a);
+        foreach (Channel ch in ChannelManager.ChannelManager.instance.channel_set)
+        {
+            Debug.Log("id:"+ch.Id+" select:"+ch.selected);
+        }
     }
 
     public void request_test()
