@@ -14,7 +14,7 @@ public class AreaManager : MonoBehaviour
     public int maxWait; //최대 대기 시간
 
     private void Awake () {
-        second = new WaitForSeconds (1.0f);
+        second = new WaitForSeconds(10.0f);
         if (instance == null)
         {
             instance = this;
@@ -65,14 +65,14 @@ public class AreaManager : MonoBehaviour
         //20초 지날경우 활성화 중단
         if (maxWait < 1) 
         {
-            Debug.Log ("Timed out");
+            Debug.Log("Timed out");
             yield break;
         }
 
         //연결 실패
         if (Input.location.status == LocationServiceStatus.Failed) 
         {
-            Debug.Log ("Unable to determine device location");
+            Debug.Log("Unable to determine device location");
             yield break;
 
         } 
@@ -95,7 +95,7 @@ public class AreaManager : MonoBehaviour
     public static void GPSStop () {
         if (Input.location.isEnabledByUser) {
             gpsStarted = false;
-            Input.location.Stop ();
+            Input.location.Stop();
         }
     }
 }
