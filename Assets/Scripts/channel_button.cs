@@ -48,8 +48,8 @@ public class channel_button : MonoBehaviour
         channel_image_update();
     }
 
-    void channel_image_update()
+    async void channel_image_update()
     {
-        channel_image.texture = channel.get_image();
+        channel_image.texture = await channel.get_image();
     }
 }

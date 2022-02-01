@@ -36,8 +36,8 @@ public class Channel_panel : MonoBehaviour
         channel_buffer_max = 4;
         btn_array = new GameObject[channel_buffer_max];
 
-        btn_start = new Vector3(200, 0, 0);
-        btn_gap = new Vector3(110, 0, 0);
+        btn_start = new Vector3(160, 0, 0);
+        btn_gap = new Vector3(90, 0, 0);
 
         btn_prefab = Resources.Load<GameObject> ("Prefabs/Channel_Button");
 		if (btn_prefab ==null)

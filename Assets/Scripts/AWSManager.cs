@@ -27,6 +27,7 @@ using Amazon.CognitoIdentity;
 using Amazon;
 using System.Net;
 using Newtonsoft.Json.Linq;
+using System.Threading.Tasks;
 
 
 namespace AWS
@@ -72,7 +73,7 @@ namespace AWS
 
         void Start()
         {
-            UnityInitializer.AttachToGameObject(this.gameObject);
+            //UnityInitializer.AttachToGameObject(this.gameObject);
 
             /*
             GetBucketListButton.onClick.AddListener(() => { GetBucketList(); });
@@ -112,7 +113,7 @@ namespace AWS
         }
 
         #endregion
-
+        /*
         #region Get Bucket List
         /// <summary>
         /// Example method to Demostrate GetBucketList
@@ -142,10 +143,12 @@ namespace AWS
         }
 
         #endregion
+        */
 
         /// <summary>
         /// Get Object from S3 Bucket
         /// </summary>
+        /*
         public string GetObject(string S3BucketName, string FileName)
         {
             string responseFromServer = string.Empty;
@@ -167,7 +170,41 @@ namespace AWS
             });
             return responseFromServer;
         }
+        */
 
+        public async Task GetObjectAsync(string S3BucketName, string FileName)
+        {
+            string responseBody = "";
+            try
+            {
+                GetObjectRequest request = new GetObjectRequest
+                {
+                    BucketName = S3BucketName,
+                    Key = FileName
+                };
+                using (GetObjectResponse response = await Client.GetObjectAsync(request))
+                using (Stream responseStream = response.ResponseStream)
+                using (StreamReader reader = new StreamReader(responseStream))
+                {
+                    string title = response.Metadata["x-amz-meta-title"]; // Assume you have "title" as medata added to the object.
+                    string contentType = response.Headers["Content-Type"];
+                    Console.WriteLine("Object metadata, Title: {0}", title);
+                    Console.WriteLine("Content type: {0}", contentType);
+
+                    responseBody = reader.ReadToEnd(); // Now you process the response body.
+                }
+            }
+            catch (AmazonS3Exception e)
+            {
+                // If bucket or object does not exist
+                Console.WriteLine("Error encountered ***. Message:'{0}' when reading object", e.Message);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Unknown encountered on server. Message:'{0}' when reading object", e.Message);
+            }
+        }
+        /*
         public Texture2D GetTexture(string S3BucketName, string FileName)
         {
             Texture2D tex = new Texture2D(2, 2);
@@ -194,6 +231,50 @@ namespace AWS
             });
             return tex;
         }
+        */
+
+        public async Task<Texture2D> GetTextureAsync(string S3BucketName, string FileName)
+        {
+            Texture2D tex = new Texture2D(2, 2);
+            try
+            {
+                GetObjectRequest request = new GetObjectRequest
+                {
+                    BucketName = S3BucketName,
+                    Key = FileName
+                };
+                using (GetObjectResponse response = await Client.GetObjectAsync(request))
+                using (Stream responseStream = response.ResponseStream)
+                {
+                    byte[] data = null;
+
+                    if (response.ResponseStream != null)
+                    {
+                        byte[] buffer = new byte[16 * 1024];
+                        using (MemoryStream ms = new MemoryStream())
+                        {
+                            int read;
+                            while ((read = responseStream.Read(buffer, 0, buffer.Length)) > 0)
+                            {
+                                ms.Write(buffer, 0, read);
+                            }
+                            data = ms.ToArray();
+                        }
+                        tex.LoadImage(data);
+                    }
+                }
+            }
+            catch (AmazonS3Exception e)
+            {
+                // If bucket or object does not exist
+                Console.WriteLine("Error encountered ***. Message:'{0}' when reading object", e.Message);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Unknown encountered on server. Message:'{0}' when reading object", e.Message);
+            }
+            return tex;
+        }
 
         public Texture2D bytesToTexture2D(byte[] imageBytes)
         {
@@ -202,7 +283,7 @@ namespace AWS
             return tex;
         }
 
-
+        /*
         /// <summary>
         /// Post Object to S3 Bucket. 
         /// </summary>
@@ -307,7 +388,7 @@ namespace AWS
                 }
             });
         }
-
+        */
 
         public JObject channel_info_get(string id)
         {

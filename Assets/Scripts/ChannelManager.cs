@@ -5,7 +5,7 @@ using System;
 
 using AWS;
 using Newtonsoft.Json.Linq;
-
+using System.Threading.Tasks;
 
 namespace ChannelManager
 {
@@ -95,14 +95,17 @@ namespace ChannelManager
 			}
 		}
 
-		public Texture2D get_image()
+		public async Task<Texture2D> get_image()
 		{
 			if (Image==null)
 			{
 				if (Image_bucket==null)
 					get_info();
 				Debug.Log(Image_name);
-				Image = AWS.AWSManager.instance.GetTexture(Image_bucket, Image_name);
+				//Image = AWS.AWSManager.instance.GetTexture(Image_bucket, Image_name);
+				//Task<Texture2D> task1 = AWS.AWSManager.instance.GetTextureAsync(Image_bucket, Image_name);
+				//await task1;
+				Image = await AWS.AWSManager.instance.GetTextureAsync(Image_bucket, Image_name);
 			}
 			return Image;
 		}
