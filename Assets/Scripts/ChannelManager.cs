@@ -6,6 +6,7 @@ using System;
 using AWS;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
+using Helper;
 
 namespace ChannelManager
 {
@@ -49,10 +50,10 @@ namespace ChannelManager
 		void test_channel_add()
 		{
 			channel_set.Add(new Channel() { Priority = 0, Id = "test"});
-			channel_set.Add(new Channel() { Priority = 100, Id = "test1"});
-			channel_set.Add(new Channel() { Priority = 100, Id = "test2"});
-			channel_set.Add(new Channel() { Priority = 200, Id = "test3"});
-			channel_set.Add(new Channel() { Priority = 0, Id = "test4"});
+			//channel_set.Add(new Channel() { Priority = 100, Id = "test1"});
+			//channel_set.Add(new Channel() { Priority = 100, Id = "test2"});
+			//channel_set.Add(new Channel() { Priority = 200, Id = "test3"});
+			//channel_set.Add(new Channel() { Priority = 0, Id = "test4"});
 		}
 
 		public void top_channel_update()
@@ -80,6 +81,7 @@ namespace ChannelManager
         public string Image_name { get; set; }
 		Texture2D Image { get; set; }
 		public bool selected { get; set; } = false;
+		public Tree<ChannelMenu> menuTree { get; set; } = new Tree<ChannelMenu>();
 
 		public void get_info()
 		{
@@ -89,9 +91,22 @@ namespace ChannelManager
 				if (((int)info["statusCode"])==200)
 				{
 					Name = info["body"]["name"].ToString();
-					Image_bucket = info["body"]["image_bucket"].ToString();
-					Image_name = info["body"]["image_name"].ToString();
+					Image_bucket = info["body"]["image"]["image_bucket"].ToString();
+					Image_name = info["body"]["image"]["image_name"].ToString();
+					insert_menu(menuTree, info["body"]["menu"]);
 				}
+			}
+		}
+
+		void insert_menu(Tree<ChannelMenu> root, JToken children)
+		{
+			Tree<ChannelMenu> tree;
+			foreach (JToken token in children)
+			{
+				tree = new Tree<ChannelMenu>();
+				tree.Node = new ChannelMenu(token["id"].ToString(), token["name"].ToString());
+				insert_menu(tree, token["children"]);
+				root.Children.Add(tree);
 			}
 		}
 
@@ -102,9 +117,6 @@ namespace ChannelManager
 				if (Image_bucket==null)
 					get_info();
 				Debug.Log(Image_name);
-				//Image = AWS.AWSManager.instance.GetTexture(Image_bucket, Image_name);
-				//Task<Texture2D> task1 = AWS.AWSManager.instance.GetTextureAsync(Image_bucket, Image_name);
-				//await task1;
 				Image = await AWS.AWSManager.instance.GetTextureAsync(Image_bucket, Image_name);
 			}
 			return Image;
@@ -113,6 +125,23 @@ namespace ChannelManager
 		public override string ToString()
 		{
 			return Id;
+		}
+	}
+
+	public class ChannelMenu
+	{
+		public string id { get; set; }
+		public string text { get; set; }
+
+		public ChannelMenu(string _id, string _text)
+		{
+			id = _id;
+			text = _text;
+		}
+
+		public override string ToString()
+		{
+			return id;
 		}
 	}
 
@@ -131,5 +160,4 @@ namespace ChannelManager
 				return 1;
 		}
 	}
-	
 }

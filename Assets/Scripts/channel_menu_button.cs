@@ -6,29 +6,22 @@ using UnityEngine.UI;
 using ChannelManager;
 using Helper;
 
-public class channel_button : MonoBehaviour
+public class channel_menu_button : MonoBehaviour
 {
-    Channel channel;
-    public Image button_image;
-    public RawImage channel_image;
-    public Sprite base_image;
-    public Sprite selected_image;
+    ChannelMenu channelMenu;
+    public Tree<ChannelMenu> channelMenuTree { get; set; }
     bool btn_selected = false;
 
-    Tree<ChannelMenu> menuTree;
     GameObject menu_prefab;
     public int menu_buffer_max { get; private set; }
-    //public GameObject[] menu_array { get; private set; }
     public List<GameObject> menu_list { get; private set; }
     public Vector3 menu_start;
     public Vector3 menu_gap;
+    public Text text;
     private bool initialized = false;
     private bool menu_activated = false;
-    float clickTime;
-    float minClickTime = 1;
-    bool isClick;
 
-    void init()
+    public void init(Tree<ChannelMenu> tree)
     {
         if (initialized)
             return;
@@ -36,13 +29,19 @@ public class channel_button : MonoBehaviour
         //menu_array = new GameObject[menu_buffer_max];
         menu_list = new List<GameObject>();
 
-        menu_start = new Vector3(0, -80, 0);
+        menu_start = new Vector3(150, 0, 0);
         menu_gap = new Vector3(0, -60, 0);
         
         menu_prefab = Resources.Load<GameObject> ("Prefabs/ChannelMenuButton");
 		if (menu_prefab ==null)
         { Debug.Log("ChannelMenuButton==null"); }
-        
+
+        channelMenuTree = tree;
+
+        text.text = channelMenuTree.Node.text;
+
+        menu_button_init();
+
         initialized = true;
     }
     
@@ -55,27 +54,14 @@ public class channel_button : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (isClick)
-        {
-            clickTime += Time.deltaTime;
-            if (clickTime>=minClickTime)
-            {
-                //이벤트
-                channel_asynchronous();
-                isClick=false;
-            }
-        }
-        else
-        {
-            clickTime = 0;
-        }
+        
     }
 
     public void menu_button_init()
     {
         int index = 0;
 
-        foreach (Tree<ChannelMenu> tree in menuTree.Children)
+        foreach (Tree<ChannelMenu> tree in channelMenuTree.Children)
         {
             menu_list.Add(menu_button_create(tree, index++));
         }
@@ -111,58 +97,16 @@ public class channel_button : MonoBehaviour
         }
     }
 
-    void channel_synchronous()
-    {
-        channel.selected = true;
-        button_image.sprite = selected_image;
-    }
-    void channel_asynchronous()
-    {
-        //채널 비동기화
-    }
-
     public void ButtonClick()
     {
         if (btn_selected)
         {
             //btn_selected = false;
-            //channel.selected = false;
-            //button_image.sprite = base_image;
             menu_activate();
         }
         else
         {
-            btn_selected = true;
-            channel_synchronous();
+            menu_activate();
         }
-    }
-
-    public void ButtonDown()
-    {
-        isClick = true;
-    }
-    public void ButtonUp()
-    {
-        clickTime = 0;
-        isClick = false;
-    }
-
-    public void channel_change(Channel input_channel)
-    {
-        init();
-        channel = input_channel;
-        channel_image_update();
-        channel_menu_update();
-    }
-
-    async void channel_image_update()
-    {
-        channel_image.texture = await channel.get_image();
-    }
-
-    void channel_menu_update()
-    {
-        menuTree = channel.menuTree;
-        menu_button_init();
     }
 }

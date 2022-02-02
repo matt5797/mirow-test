@@ -9,26 +9,11 @@ using Newtonsoft.Json.Linq;
 
 public class test_script : MonoBehaviour
 {
-    static string targetURL = "http://data.ex.co.kr/openapi/safeDriving/forecast?key=test&type=json";
+    public GameObject parentObject;
     // Start is called before the first frame update
     void Start()
     {
-        Debug.Log("I am alive!");
-
-        string wbRequestResult = callWebRequest();
-        var r2 = JObject.Parse(wbRequestResult);
-        var list2 = r2["list"];
-
-        Debug.Log(r2);
-        foreach (var o in list2)
-        {
-            Debug.Log(string.Format("{0} : {1}", "날짜", o["sdate"]));
-            Debug.Log(string.Format("{0} : {1}", "전국교통량", o["cjunkook"]));
-            Debug.Log(string.Format("{0} : {1}", "지방교통량", o["cjibangDir"]));
-            Debug.Log(string.Format("{0} : {1}", "대전->서울 버스 소요시간", o["cdjsu_bus"]));
-            Debug.Log(string.Format("{0} : {1}", "대구->서울 버스 소요시간", o["cdgsu_bus"]));
-            Debug.Log(string.Format("{0} : {1}", "울산->서울 버스 소요시간", o["cussu_bus"]));
-        }
+        DeleteChilds();
     }
 
     // Update is called once per frame
@@ -36,30 +21,18 @@ public class test_script : MonoBehaviour
     {
         
     }
-
-    public static string callWebRequest()
+    public void DeleteChilds()
     {
-        string responseFromServer = string.Empty;
+        // child 에는 부모와 자식이 함께 설정 된다.
+        Transform[] childlist = parentObject.GetComponentsInChildren<Transform>();
 
-        try
+        foreach (var iter in childlist)
         {
-            WebRequest request = WebRequest.Create(targetURL);
-            request.Method = "GET";
-            request.ContentType = "application/json";
-
-            using (WebResponse response = request.GetResponse())
-            using (Stream dataStream = response.GetResponseStream())
-            using (StreamReader reader = new StreamReader(dataStream))
+            // 부모(this.gameObject)는 삭제 하지 않기 위한 처리
+            if(iter != this.transform)
             {
-                responseFromServer = reader.ReadToEnd();
+                Destroy(iter.gameObject);
             }
-
         }
-        catch (Exception e)
-        {
-            Debug.Log(e.ToString());
-        }
-
-        return responseFromServer;
     }
 }

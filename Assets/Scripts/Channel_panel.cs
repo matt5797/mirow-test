@@ -5,6 +5,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 using ChannelManager;
+using Helper;
 
 public class Channel_panel : MonoBehaviour
 {
@@ -39,9 +40,9 @@ public class Channel_panel : MonoBehaviour
         btn_start = new Vector3(160, 0, 0);
         btn_gap = new Vector3(90, 0, 0);
 
-        btn_prefab = Resources.Load<GameObject> ("Prefabs/Channel_Button");
+        btn_prefab = Resources.Load<GameObject> ("Prefabs/ChannelButton");
 		if (btn_prefab ==null)
-        { Debug.Log("btnpreprefab==null"); }
+        { Debug.Log("ChannelButton==null"); }
 
         button_init();
     }
