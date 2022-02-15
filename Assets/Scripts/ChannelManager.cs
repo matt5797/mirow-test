@@ -16,6 +16,17 @@ namespace ChannelManager
 		//public ChannelQueue queue;
 		public SortedSet<Channel> channel_set { get; private set; }
 		int channel_buffer_max;
+		//public event EventHandler ShapeChanged;
+
+		protected virtual void OnChannelSetChanged()  
+        {
+			//ShapeChanged(this, e);
+			top_channel_update();
+			string res = "채널 리스트 출력";
+			foreach (Channel ch in channel_set)
+				res += "\n" + ch.Id;
+			Debug.Log(res);
+        }
 
 		private void Awake()
         {
@@ -35,8 +46,9 @@ namespace ChannelManager
 		void Start()
 		{
 			channel_set = new SortedSet<Channel>(new ChannelComparer());
-			channel_buffer_max = Channel_panel.instance.channel_buffer_max;
-			test_channel_add();
+			channel_buffer_max = ChannelPanel.instance.channel_buffer_max;
+			//test_channel_add();
+			//test_channel_update();
 			//JObject res = AWSManager.instance.channel_info_get("test");
 			//test();
 		}
@@ -47,13 +59,44 @@ namespace ChannelManager
 			
 		}
 
-		void test_channel_add()
+		public void channel_list_update(List<String> channel_list)
 		{
-			channel_set.Add(new Channel() { Priority = 0, Id = "test"});
-			//channel_set.Add(new Channel() { Priority = 100, Id = "test1"});
-			//channel_set.Add(new Channel() { Priority = 100, Id = "test2"});
-			//channel_set.Add(new Channel() { Priority = 200, Id = "test3"});
-			//channel_set.Add(new Channel() { Priority = 0, Id = "test4"});
+			List<Channel> temp_list = new List<Channel>();
+
+			foreach (Channel ch in channel_set)
+			{
+				if (channel_list.Contains(ch.Id))
+					channel_list.Remove(ch.Id);
+				else
+					temp_list.Add(ch);
+			}
+
+			foreach (Channel ch in temp_list)
+				channel_set.Remove(ch);
+
+			foreach (string channel_id in channel_list)
+				channel_set.Add(new Channel() { Priority = 0, Id = channel_id});
+			
+			OnChannelSetChanged();
+		}
+
+		public void test_channel_add()
+		{
+			channel_set.Add(new Channel() { Priority = 0, Id = "e8dba2d4-c6d5-4e99-ac0d-fce066786caf"});
+			//channel_set.Add(new Channel() { Priority = 100, Id = "0eb4f076-8adf-4639-b285-508da2a49d39"});
+			//channel_set.Add(new Channel() { Priority = 100, Id = "6e776214-b144-4648-aefd-64851a9c1900"});
+			//channel_set.Add(new Channel() { Priority = 200, Id = "8a684aaa-d79a-44e7-a68b-4122f560293c"});
+			//channel_set.Add(new Channel() { Priority = 0, Id = "f88397a4-6c41-4a42-b868-40f26d4f071e"});
+			//channel_set.Add(new Channel() { Priority = 0, Id = "f32db066-ff35-4b0a-97f4-264a46377bfa"});
+			OnChannelSetChanged();
+		}
+
+		void test_channel_update()
+		{
+			List<string> temp_list = new List<string>();
+
+			temp_list.Add("0eb4f076-8adf-4639-b285-508da2a49d39");
+			channel_list_update(temp_list);
 		}
 
 		public void top_channel_update()
@@ -68,7 +111,7 @@ namespace ChannelManager
 					channel_array[i] = enumerator.Current;
 				}
 			}
-			Channel_panel.instance.button_update(channel_array);
+			ChannelPanel.instance.button_update(channel_array);
 		}
 	}
 
@@ -83,11 +126,11 @@ namespace ChannelManager
 		public bool selected { get; set; } = false;
 		public Tree<ChannelMenu> menuTree { get; set; } = new Tree<ChannelMenu>();
 
-		public void get_info()
+		public async Task get_info()
 		{
 			if (Name==null)
 			{
-				JObject info = AWSManager.instance.channel_info_get(Id);
+				JObject info = await AWSManager.instance.channelInfoGet(Id);
 				if (((int)info["statusCode"])==200)
 				{
 					Name = info["body"]["name"].ToString();
@@ -115,8 +158,7 @@ namespace ChannelManager
 			if (Image==null)
 			{
 				if (Image_bucket==null)
-					get_info();
-				Debug.Log(Image_name);
+					await get_info();
 				Image = await AWS.AWSManager.instance.GetTextureAsync(Image_bucket, Image_name);
 			}
 			return Image;
@@ -154,10 +196,14 @@ namespace ChannelManager
 
 			if (cx.Id==cy.Id)
 				return 0;
-			else if (cx.Priority>=cy.Priority)
+			else if (cx.Priority>cy.Priority)
 				return -1;
-			else
+			else if (cx.Priority<cy.Priority)
 				return 1;
+			if (cx.GetHashCode()>cy.GetHashCode())
+				return 1;
+			else
+				return -1;
 		}
 	}
 }

@@ -5,8 +5,9 @@ using UnityEngine.UI;
 
 using ChannelManager;
 using Helper;
+using ModalPanel;
 
-public class channel_button : MonoBehaviour
+public class ChannelButton : MonoBehaviour
 {
     Channel channel;
     public Image button_image;
@@ -16,40 +17,51 @@ public class channel_button : MonoBehaviour
     bool btn_selected = false;
 
     Tree<ChannelMenu> menuTree;
-    GameObject menu_prefab;
+    Button menu_prefab;
     public int menu_buffer_max { get; private set; }
-    //public GameObject[] menu_array { get; private set; }
-    public List<GameObject> menu_list { get; private set; }
+    public List<Button> menu_list { get; private set; }
     public Vector3 menu_start;
     public Vector3 menu_gap;
-    private bool initialized = false;
     private bool menu_activated = false;
     float clickTime;
     float minClickTime = 1;
     bool isClick;
 
+    /*
     void init()
     {
         if (initialized)
             return;
         menu_buffer_max = 6;
-        //menu_array = new GameObject[menu_buffer_max];
-        menu_list = new List<GameObject>();
+        menu_list = new List<Button>();
 
         menu_start = new Vector3(0, -80, 0);
         menu_gap = new Vector3(0, -60, 0);
         
-        menu_prefab = Resources.Load<GameObject> ("Prefabs/ChannelMenuButton");
+        menu_prefab = Resources.Load<Button> ("Prefabs/ChannelMenuButton");
 		if (menu_prefab ==null)
         { Debug.Log("ChannelMenuButton==null"); }
         
         initialized = true;
     }
+    */
+
+    void Awake()
+    {
+        menu_buffer_max = 6;
+        menu_list = new List<Button>();
+
+        menu_start = new Vector3(0, -80, 0);
+        menu_gap = new Vector3(0, -60, 0);
+        
+        menu_prefab = Resources.Load<Button> ("Prefabs/ChannelMenuButton");
+		if (menu_prefab ==null)
+        { Debug.Log("ChannelMenuButton==null"); }
+    }
     
     // Start is called before the first frame update
     void Start()
     {
-
     }
 
     // Update is called once per frame
@@ -60,7 +72,6 @@ public class channel_button : MonoBehaviour
             clickTime += Time.deltaTime;
             if (clickTime>=minClickTime)
             {
-                //이벤트
                 channel_asynchronous();
                 isClick=false;
             }
@@ -69,6 +80,15 @@ public class channel_button : MonoBehaviour
         {
             clickTime = 0;
         }
+    }
+
+    void resetButton()
+    {
+        menu_list = new List<Button>();
+        btn_selected = false;
+        menu_activated = false;
+        menuTree = null;
+        button_image.sprite = base_image;
     }
 
     public void menu_button_init()
@@ -81,9 +101,9 @@ public class channel_button : MonoBehaviour
         }
     }
 
-    public GameObject menu_button_create(Tree<ChannelMenu> menu, int index)
+    public Button menu_button_create(Tree<ChannelMenu> menu, int index)
     {
-        GameObject button = Instantiate(menu_prefab, this.transform);
+        Button button = Instantiate(menu_prefab, this.transform);
         if (button==null)
         { Debug.Log("button==null"); }
         
@@ -99,35 +119,51 @@ public class channel_button : MonoBehaviour
     {
         if (menu_activated)
         {
-            foreach (GameObject menu in menu_list)
-                menu.SetActive(false);
+            foreach (Button menu in menu_list)
+                menu.gameObject.SetActive(false);
             menu_activated = false;
         }
         else
         {
-            foreach (GameObject menu in menu_list)
-                menu.SetActive(true);
+            foreach (Button menu in menu_list)
+                menu.gameObject.SetActive(true);
             menu_activated = true;
         }
     }
 
     void channel_synchronous()
     {
+        //채널 동기화
         channel.selected = true;
         button_image.sprite = selected_image;
     }
     void channel_asynchronous()
     {
         //채널 비동기화
+        asynchronous_modal();
+        channel.selected = false;
+        button_image.sprite = base_image;
+    }
+
+    public void asynchronous_modal () {
+        ModalPanelDetails modalPanelDetails = new ModalPanelDetails {question = "해당 채널과 비동기화 하시겠습니까?"};
+        modalPanelDetails.button1Details = new EventButtonDetails {
+            buttonTitle = "네",
+            action = () => { }
+        };
+        modalPanelDetails.button2Details = new EventButtonDetails {
+            buttonTitle = "아니요",
+            action = () => { }
+        };
+        //ModalPanel.ModalPanel.instance.NewChoice(modalPanelDetails);
+        int a = ModalPanel.ModalPanel.instance.Choice(modalPanelDetails);
     }
 
     public void ButtonClick()
     {
         if (btn_selected)
         {
-            //btn_selected = false;
-            //channel.selected = false;
-            //button_image.sprite = base_image;
+            btn_selected = false;
             menu_activate();
         }
         else
@@ -149,7 +185,7 @@ public class channel_button : MonoBehaviour
 
     public void channel_change(Channel input_channel)
     {
-        init();
+        resetButton();
         channel = input_channel;
         channel_image_update();
         channel_menu_update();

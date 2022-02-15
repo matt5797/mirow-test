@@ -13,6 +13,7 @@ using ChannelManager;
 public class debug_pannel : MonoBehaviour
 {
     public Text gqs_text;
+    public RawImage test_image;
     int a = 0;
     // Start is called before the first frame update
     void Start()
@@ -31,16 +32,21 @@ public class debug_pannel : MonoBehaviour
         ChannelManager.ChannelManager.instance.top_channel_update();
     }
 
+    public void test_channel_add()
+    {
+        ChannelManager.ChannelManager.instance.test_channel_add();
+    }
+
+    public void test_gps_change()
+    {
+        AreaManager.instance.channel_list_update(126.7335, 37.3402);
+    }
+
     public void button_all_set_active(bool acive)
     {
-        GameObject[] btn_array = Channel_panel.instance.btn_array;
-        for (int i=0; i<btn_array.Length; i++)
-        {
-            if (btn_array[i]!=null)
-            {
-                btn_array[i].SetActive(acive);
-            }
-        }
+        List<Button> btn_list = ChannelPanel.instance.btn_list;
+        foreach (Button button in btn_list)
+            button.gameObject.SetActive(acive);
     }
 
     public void channel_is_selected()
@@ -96,5 +102,10 @@ public class debug_pannel : MonoBehaviour
         }
 
         return responseFromServer;
+    }
+
+    public async void image_test()
+    {
+        test_image.texture = await AWS.AWSManager.instance.GetTextureAsync("mirow-channel-image", "test_image1.png");
     }
 }

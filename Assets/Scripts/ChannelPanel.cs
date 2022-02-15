@@ -7,16 +7,16 @@ using UnityEngine.UI;
 using ChannelManager;
 using Helper;
 
-public class Channel_panel : MonoBehaviour
+public class ChannelPanel : MonoBehaviour
 {
-    public static Channel_panel instance = null;
-    GameObject btn_prefab; 
+    public static ChannelPanel instance = null;
+    Button btn_prefab; 
     public Transform panel_pos;
     public int channel_buffer_max { get; private set; }
-    public GameObject[] btn_array { get; private set; }
+    public List<Button> btn_list { get; private set; }
     public Vector3 btn_start;
     public Vector3 btn_gap;
-    public GameObject selected_btn;
+    public Button selected_btn;
 
     private void Awake()
     {
@@ -35,12 +35,12 @@ public class Channel_panel : MonoBehaviour
     void Start()
     {
         channel_buffer_max = 4;
-        btn_array = new GameObject[channel_buffer_max];
+        btn_list = new List<Button>();
 
         btn_start = new Vector3(160, 0, 0);
         btn_gap = new Vector3(90, 0, 0);
 
-        btn_prefab = Resources.Load<GameObject> ("Prefabs/ChannelButton");
+        btn_prefab = Resources.Load<Button> ("Prefabs/ChannelButton");
 		if (btn_prefab ==null)
         { Debug.Log("ChannelButton==null"); }
 
@@ -55,34 +55,43 @@ public class Channel_panel : MonoBehaviour
     public void button_init()
     {
         for (int i=0; i<channel_buffer_max; i++)
-        {
-            btn_array[i] = button_create(i);
-        }
+            btn_list.Add(button_create(i));
     }
 
-    public GameObject button_create(int index)
+    public Button button_create(int index)
     {
-        GameObject button = Instantiate(btn_prefab, panel_pos);
+        Button button = Instantiate(btn_prefab, panel_pos);
         if (button==null)
         { Debug.Log("button==null"); }
         
+        //button.GetComponent<ChannelButton>().
         button.transform.localPosition = btn_start + (btn_gap * index);
         return button;
     }
 
     public void button_update(Channel[] channels)
     {
-        for (int i=0; i<btn_array.Length; i++)
+        int index = 0;
+        foreach (Button button in btn_list)
         {
-            if (channels[i]==null)
+            if (channels[index]==null)
             {
-                btn_array[i].SetActive(false);
+                button.gameObject.SetActive(false);
             }
             else
             {
-                btn_array[i].GetComponent<channel_button>().channel_change(channels[i]);
-                btn_array[i].SetActive(true);
+                button.GetComponent<ChannelButton>().channel_change(channels[index]);
+                button.gameObject.SetActive(true);
             }
+            index++;
+        }
+    }
+
+    void button_active()
+    {
+        foreach (Button btn in btn_list)
+        {
+            //btn.GetComponent<ChannelButton>()
         }
     }
 }

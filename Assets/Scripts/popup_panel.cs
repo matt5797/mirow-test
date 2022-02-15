@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+
+using UnityEngine.UI;
 public class popup_panel : MonoBehaviour
 {
-    public GameObject popupPanel;
-    public bool panel_active = false;
+    bool panel_active = false;
+    public Text text;
+    public Button button;
     // Start is called before the first frame update
     void Start()
     {
@@ -19,15 +22,15 @@ public class popup_panel : MonoBehaviour
         
     }
 
-    public void active_change()
+    public void SetActive()
     {
         if (gameObject.activeSelf == true)
         {
-            popupPanel.SetActive(false);
+            gameObject.SetActive(false);
         }
         else
         {
-            popupPanel.SetActive(true);
+            gameObject.SetActive(true);
         }
     }
 }

@@ -42,10 +42,10 @@ namespace AWS
         {
             get { return RegionEndpoint.GetBySystemName(CognitoIdentityRegion); }
         }
-        string S3Region = RegionEndpoint.APNortheast2.SystemName;
-        private RegionEndpoint _S3Region
+        string Region = RegionEndpoint.APNortheast2.SystemName;
+        private RegionEndpoint _Region
         {
-            get { return RegionEndpoint.GetBySystemName(S3Region); }
+            get { return RegionEndpoint.GetBySystemName(Region); }
         }
         string S3BucketName = null;
         string SampleFileName = null;
@@ -87,6 +87,7 @@ namespace AWS
         #region private members
 
         private IAmazonS3 _s3Client;
+
         private AWSCredentials _credentials;
 
         private AWSCredentials Credentials
@@ -99,13 +100,13 @@ namespace AWS
             }
         }
 
-        private IAmazonS3 Client
+        private IAmazonS3 S3Client
         {
             get
             {
                 if (_s3Client == null)
                 {
-                    _s3Client = new AmazonS3Client(Credentials, _S3Region);
+                    _s3Client = new AmazonS3Client(Credentials, _Region);
                 }
                 //test comment
                 return _s3Client;
@@ -113,64 +114,6 @@ namespace AWS
         }
 
         #endregion
-        /*
-        #region Get Bucket List
-        /// <summary>
-        /// Example method to Demostrate GetBucketList
-        /// </summary>
-        public void GetBucketList()
-        {
-            AWSConfigs.HttpClient = AWSConfigs.HttpClientOption.UnityWebRequest;    //임의추가
-
-            ResultText.text = "Fetching all the Buckets";
-            Client.ListBucketsAsync(new ListBucketsRequest(), (responseObject) =>
-            {
-                ResultText.text += "\n";
-                if (responseObject.Exception == null)
-                {
-                    ResultText.text += "Got Response \nPrinting now \n";
-                    responseObject.Response.Buckets.ForEach((s3b) =>
-                    {
-                        ResultText.text += string.Format("bucket = {0}, created date = {1} \n", s3b.BucketName, s3b.CreationDate);
-                    });
-                }
-                else
-                {
-                    ResultText.text += "Got Exception \n";
-                    Debug.Log(responseObject.Exception);
-                }
-            });
-        }
-
-        #endregion
-        */
-
-        /// <summary>
-        /// Get Object from S3 Bucket
-        /// </summary>
-        /*
-        public string GetObject(string S3BucketName, string FileName)
-        {
-            string responseFromServer = string.Empty;
-            Client.GetObjectAsync(S3BucketName, FileName, (responseObj) =>
-            {
-                var response = responseObj.Response;
-                
-                if (response.ResponseStream != null)
-                {
-                    using (StreamReader reader = new StreamReader(response.ResponseStream))
-                    {
-                        responseFromServer = reader.ReadToEnd();
-                    }
-                }
-                else
-                {
-                    Debug.Log(responseObj.Exception);
-                }
-            });
-            return responseFromServer;
-        }
-        */
 
         public async Task GetObjectAsync(string S3BucketName, string FileName)
         {
@@ -182,7 +125,7 @@ namespace AWS
                     BucketName = S3BucketName,
                     Key = FileName
                 };
-                using (GetObjectResponse response = await Client.GetObjectAsync(request))
+                using (GetObjectResponse response = await S3Client.GetObjectAsync(request))
                 using (Stream responseStream = response.ResponseStream)
                 using (StreamReader reader = new StreamReader(responseStream))
                 {
@@ -196,7 +139,6 @@ namespace AWS
             }
             catch (AmazonS3Exception e)
             {
-                // If bucket or object does not exist
                 Console.WriteLine("Error encountered ***. Message:'{0}' when reading object", e.Message);
             }
             catch (Exception e)
@@ -204,34 +146,6 @@ namespace AWS
                 Console.WriteLine("Unknown encountered on server. Message:'{0}' when reading object", e.Message);
             }
         }
-        /*
-        public Texture2D GetTexture(string S3BucketName, string FileName)
-        {
-            Texture2D tex = new Texture2D(2, 2);
-            Client.GetObjectAsync(S3BucketName, FileName, (responseObj) =>
-            {
-                byte[] data = null;
-                var response = responseObj.Response;
-                Stream input = response.ResponseStream;
-
-                if (response.ResponseStream != null)
-                {
-                    byte[] buffer = new byte[16 * 1024];
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        int read;
-                        while ((read = input.Read(buffer, 0, buffer.Length)) > 0)
-                        {
-                            ms.Write(buffer, 0, read);
-                        }
-                        data = ms.ToArray();
-                    }
-                    tex.LoadImage(data);
-                }
-            });
-            return tex;
-        }
-        */
 
         public async Task<Texture2D> GetTextureAsync(string S3BucketName, string FileName)
         {
@@ -243,7 +157,7 @@ namespace AWS
                     BucketName = S3BucketName,
                     Key = FileName
                 };
-                using (GetObjectResponse response = await Client.GetObjectAsync(request))
+                using (GetObjectResponse response = await S3Client.GetObjectAsync(request))
                 using (Stream responseStream = response.ResponseStream)
                 {
                     byte[] data = null;
@@ -283,114 +197,7 @@ namespace AWS
             return tex;
         }
 
-        /*
-        /// <summary>
-        /// Post Object to S3 Bucket. 
-        /// </summary>
-        public void PostObject()
-        {
-            ResultText.text = "Retrieving the file";
-
-            string fileName = GetFileHelper();
-             
-            var stream = new FileStream(Application.persistentDataPath + Path.DirectorySeparatorChar + fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
-
-            ResultText.text += "\nCreating request object";
-            var request = new PostObjectRequest()
-            {
-                Bucket = S3BucketName,
-                Key = fileName,
-                InputStream = stream,
-                CannedACL = S3CannedACL.Private
-            };
-
-            ResultText.text += "\nMaking HTTP post call";
-
-            Client.PostObjectAsync(request, (responseObj) =>
-            {
-                if (responseObj.Exception == null)
-                {
-                    ResultText.text += string.Format("\nobject {0} posted to bucket {1}", responseObj.Request.Key, responseObj.Request.Bucket);
-                }
-                else
-                {
-                    ResultText.text += "\nException while posting the result object";
-                    ResultText.text += string.Format("\n receieved error {0}", responseObj.Response.HttpStatusCode.ToString());
-                }
-            });
-        }
-
-        /// <summary>
-        /// Get Objects from S3 Bucket
-        /// </summary>
-        public void GetObjects()
-        {
-            ResultText.text = "Fetching all the Objects from " + S3BucketName;
-
-            var request = new ListObjectsRequest()
-            {
-                BucketName = S3BucketName
-            };
-
-            Client.ListObjectsAsync(request, (responseObject) =>
-            {
-                ResultText.text += "\n";
-                if (responseObject.Exception == null)
-                {
-                    ResultText.text += "Got Response \nPrinting now \n";
-                    responseObject.Response.S3Objects.ForEach((o) =>
-                    {
-                        ResultText.text += string.Format("{0}\n", o.Key);
-                    });
-                }
-                else
-                {
-                    ResultText.text += "Got Exception \n";
-                }
-            });
-        }
-
-        /// <summary>
-        /// Delete Objects in S3 Bucket
-        /// </summary>
-        public void DeleteObject()
-        {
-            ResultText.text = string.Format("deleting {0} from bucket {1}", SampleFileName, S3BucketName);
-            List<KeyVersion> objects = new List<KeyVersion>();
-            objects.Add(new KeyVersion()
-            {
-                Key = SampleFileName
-            });
-
-            var request = new DeleteObjectsRequest()
-            {
-                BucketName = S3BucketName,
-                Objects = objects
-            };
-
-            Client.DeleteObjectsAsync(request, (responseObj) =>
-            {
-                ResultText.text += "\n";
-                if (responseObj.Exception == null)
-                {
-                    ResultText.text += "Got Response \n \n";
-
-                    ResultText.text += string.Format("deleted objects \n");
-
-                    responseObj.Response.DeletedObjects.ForEach((dObj) =>
-                    {
-                        ResultText.text += dObj.Key;
-                    });
-                }
-                else
-                {
-                    ResultText.text += "Got Exception \n";
-                }
-            });
-        }
-        */
-
-        public JObject channel_info_get(string id)
+        public async Task<JObject> channelInfoGet(string id)
         {
             string pathAPI = "/channel/info";
             JObject result = null;
@@ -401,7 +208,35 @@ namespace AWS
                 request.ContentType = "application/json";
                 request.Headers.Add("id", id);
 
-                using (WebResponse response = request.GetResponse())
+                using (WebResponse response = await request.GetResponseAsync())
+                using (Stream dataStream = response.GetResponseStream())
+                using (StreamReader reader = new StreamReader(dataStream))
+                {
+                    result = JObject.Parse(reader.ReadToEnd());
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e.ToString());
+            }
+            return result;
+        }
+
+        public async Task<JObject> areaGetAsync(double input_lat, double input_long, int srid=4166, double range=0.005)
+        {
+            string pathAPI = "/area";
+            JObject result = null;
+            try
+            {
+                WebRequest request = WebRequest.Create(BaseAPI + pathAPI);
+                request.Method = "GET";
+                request.ContentType = "application/json";
+                request.Headers.Add("lat", input_lat.ToString());
+                request.Headers.Add("long", input_long.ToString());
+                request.Headers.Add("srid", srid.ToString());
+                request.Headers.Add("findRange", range.ToString());
+
+                using (WebResponse response = await request.GetResponseAsync())
                 using (Stream dataStream = response.GetResponseStream())
                 using (StreamReader reader = new StreamReader(dataStream))
                 {
