@@ -6,10 +6,10 @@ using UnityEngine.UI;
 using ChannelManager;
 using Helper;
 
-public class channel_menu_button : MonoBehaviour
+public class ChannelMenuButton : MonoBehaviour
 {
-    ChannelMenu channelMenu;
-    public Tree<ChannelMenu> channelMenuTree { get; set; }
+    ChannelManager.ChannelMenu channelMenu;
+    public Tree<ChannelManager.ChannelMenu> channelMenuTree { get; set; }
     bool btn_selected = false;
 
     GameObject menu_prefab;
@@ -21,7 +21,7 @@ public class channel_menu_button : MonoBehaviour
     private bool initialized = false;
     private bool menu_activated = false;
 
-    public void init(Tree<ChannelMenu> tree)
+    public void init(Tree<ChannelManager.ChannelMenu> tree)
     {
         if (initialized)
             return;
@@ -61,22 +61,22 @@ public class channel_menu_button : MonoBehaviour
     {
         int index = 0;
 
-        foreach (Tree<ChannelMenu> tree in channelMenuTree.Children)
+        foreach (Tree<ChannelManager.ChannelMenu> tree in channelMenuTree.Children)
         {
             menu_list.Add(menu_button_create(tree, index++));
         }
     }
 
-    public GameObject menu_button_create(Tree<ChannelMenu> menu, int index)
+    public GameObject menu_button_create(Tree<ChannelManager.ChannelMenu> menu, int index)
     {
         GameObject button = Instantiate(menu_prefab, this.transform);
         if (button==null)
         { Debug.Log("button==null"); }
         
         button.transform.localPosition = menu_start + (menu_gap * index);
-        Component component = button.GetComponent<channel_menu_button>();
+        Component component = button.GetComponent<ChannelMenuButton>();
         
-        button.GetComponent<channel_menu_button>().init(menu);
+        button.GetComponent<ChannelMenuButton>().init(menu);
 
         return button;
     }

@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using System;
 
-public class channel_menu : MonoBehaviour
+public class ChannelMenu : MonoBehaviour
 {
     GameObject btn_prefab; 
     public Transform panel_pos;

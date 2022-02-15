@@ -10,7 +10,7 @@ using Newtonsoft.Json.Linq;
 
 using ChannelManager;
 
-public class debug_pannel : MonoBehaviour
+public class DebugPannel : MonoBehaviour
 {
     public Text gqs_text;
     public RawImage test_image;

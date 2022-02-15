@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using ChannelManager;
 using Helper;
 using ModalPanel;
+using System.Threading.Tasks;
 
 public class ChannelButton : MonoBehaviour
 {
@@ -16,7 +17,7 @@ public class ChannelButton : MonoBehaviour
     public Sprite selected_image;
     bool btn_selected = false;
 
-    Tree<ChannelMenu> menuTree;
+    Tree<ChannelManager.ChannelMenu> menuTree;
     Button menu_prefab;
     public int menu_buffer_max { get; private set; }
     public List<Button> menu_list { get; private set; }
@@ -95,22 +96,20 @@ public class ChannelButton : MonoBehaviour
     {
         int index = 0;
 
-        foreach (Tree<ChannelMenu> tree in menuTree.Children)
-        {
+        foreach (Tree<ChannelManager.ChannelMenu> tree in menuTree.Children)
             menu_list.Add(menu_button_create(tree, index++));
-        }
     }
 
-    public Button menu_button_create(Tree<ChannelMenu> menu, int index)
+    public Button menu_button_create(Tree<ChannelManager.ChannelMenu> menu, int index)
     {
         Button button = Instantiate(menu_prefab, this.transform);
         if (button==null)
         { Debug.Log("button==null"); }
         
         button.transform.localPosition = menu_start + (menu_gap * index);
-        Component component = button.GetComponent<channel_menu_button>();
+        Component component = button.GetComponent<ChannelMenuButton>();
         
-        button.GetComponent<channel_menu_button>().init(menu);
+        button.GetComponent<ChannelMenuButton>().init(menu);
 
         return button;
     }
@@ -126,7 +125,9 @@ public class ChannelButton : MonoBehaviour
         else
         {
             foreach (Button menu in menu_list)
+            {
                 menu.gameObject.SetActive(true);
+            }
             menu_activated = true;
         }
     }
@@ -137,15 +138,20 @@ public class ChannelButton : MonoBehaviour
         channel.selected = true;
         button_image.sprite = selected_image;
     }
+
     void channel_asynchronous()
     {
         //채널 비동기화
-        asynchronous_modal();
-        channel.selected = false;
-        button_image.sprite = base_image;
+        int res = asynchronous_modal();
+        Debug.Log("모달 결과:"+res);
+        if (res==1)
+        {
+            channel.selected = false;
+            button_image.sprite = base_image;
+        }
     }
 
-    public void asynchronous_modal () {
+    public int asynchronous_modal () {
         ModalPanelDetails modalPanelDetails = new ModalPanelDetails {question = "해당 채널과 비동기화 하시겠습니까?"};
         modalPanelDetails.button1Details = new EventButtonDetails {
             buttonTitle = "네",
@@ -156,20 +162,19 @@ public class ChannelButton : MonoBehaviour
             action = () => { }
         };
         //ModalPanel.ModalPanel.instance.NewChoice(modalPanelDetails);
-        int a = ModalPanel.ModalPanel.instance.Choice(modalPanelDetails);
+        return ModalPanel.ModalPanel.instance.Choice(modalPanelDetails);
     }
 
     public void ButtonClick()
     {
-        if (btn_selected)
-        {
-            btn_selected = false;
-            menu_activate();
-        }
-        else
+        if (!btn_selected)
         {
             btn_selected = true;
             channel_synchronous();
+        }
+        else
+        {
+            menu_activate();
         }
     }
 
@@ -183,15 +188,15 @@ public class ChannelButton : MonoBehaviour
         isClick = false;
     }
 
-    public void channel_change(Channel input_channel)
+    public async void channel_change(Channel input_channel)
     {
         resetButton();
         channel = input_channel;
-        channel_image_update();
+        await channel_image_update();
         channel_menu_update();
     }
 
-    async void channel_image_update()
+    async Task channel_image_update()
     {
         channel_image.texture = await channel.get_image();
     }
