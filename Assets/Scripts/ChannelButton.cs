@@ -71,11 +71,13 @@ public class ChannelButton : MonoBehaviour
         if (isClick)
         {
             clickTime += Time.deltaTime;
+            /*
             if (clickTime>=minClickTime)
             {
                 channel_asynchronous();
                 isClick=false;
             }
+            */
         }
         else
         {
@@ -132,26 +134,28 @@ public class ChannelButton : MonoBehaviour
         }
     }
 
-    void channel_synchronous()
+    async void channel_synchronous()
     {
         //채널 동기화
-        channel.selected = true;
-        button_image.sprite = selected_image;
-    }
-
-    void channel_asynchronous()
-    {
-        //채널 비동기화
-        int res = asynchronous_modal();
-        Debug.Log("모달 결과:"+res);
+        ModalPanelDetails modalPanelDetails = new ModalPanelDetails {question = "해당 채널과 동기화 하시겠습니까?"};
+        modalPanelDetails.button1Details = new EventButtonDetails {
+            buttonTitle = "네",
+            action = () => { }
+        };
+        modalPanelDetails.button2Details = new EventButtonDetails {
+            buttonTitle = "아니요",
+            action = () => { }
+        };
+        int res = await ModalPanel.ModalPanel.instance.Choice(modalPanelDetails);
         if (res==1)
         {
-            channel.selected = false;
-            button_image.sprite = base_image;
+            btn_selected = true;
+            channel.selected = true;
+            button_image.sprite = selected_image;
         }
     }
-
-    public int asynchronous_modal () {
+    
+    public async void channel_asynchronous () {
         ModalPanelDetails modalPanelDetails = new ModalPanelDetails {question = "해당 채널과 비동기화 하시겠습니까?"};
         modalPanelDetails.button1Details = new EventButtonDetails {
             buttonTitle = "네",
@@ -161,10 +165,18 @@ public class ChannelButton : MonoBehaviour
             buttonTitle = "아니요",
             action = () => { }
         };
-        //ModalPanel.ModalPanel.instance.NewChoice(modalPanelDetails);
-        return ModalPanel.ModalPanel.instance.Choice(modalPanelDetails);
+        int res = await ModalPanel.ModalPanel.instance.Choice(modalPanelDetails);
+        if (res==1)
+        {
+            btn_selected = false;
+            channel.selected = false;
+            button_image.sprite = base_image;
+            foreach (Button menu in menu_list)
+                menu.gameObject.SetActive(false);
+            menu_activated = false;
+        }
     }
-
+    /*
     public void ButtonClick()
     {
         if (!btn_selected)
@@ -177,6 +189,7 @@ public class ChannelButton : MonoBehaviour
             menu_activate();
         }
     }
+    */
 
     public void ButtonDown()
     {
@@ -184,6 +197,22 @@ public class ChannelButton : MonoBehaviour
     }
     public void ButtonUp()
     {
+        if (btn_selected && clickTime>=minClickTime)
+        {
+            channel_asynchronous();
+            isClick=false;
+        }
+        else
+        {
+            if (!btn_selected)
+            {
+                channel_synchronous();
+            }
+            else
+            {
+                menu_activate();
+            }
+        }
         clickTime = 0;
         isClick = false;
     }
