@@ -222,7 +222,7 @@ namespace AWS
             return result;
         }
 
-        public async Task<JObject> areaGetAsync(double input_lat, double input_long, int srid=4166, double range=0.005)
+        public async Task<JObject> areaGetAsync(float input_lat, float input_long, int srid=4166, float range=0.005f, int limit=20)
         {
             string pathAPI = "/area";
             JObject result = null;
@@ -235,6 +235,7 @@ namespace AWS
                 request.Headers.Add("long", input_long.ToString());
                 request.Headers.Add("srid", srid.ToString());
                 request.Headers.Add("findRange", range.ToString());
+                request.Headers.Add("limit", limit.ToString());
 
                 using (WebResponse response = await request.GetResponseAsync())
                 using (Stream dataStream = response.GetResponseStream())

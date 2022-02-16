@@ -20,7 +20,7 @@ public class ChannelButton : MonoBehaviour
     Tree<ChannelManager.ChannelMenu> menuTree;
     Button menu_prefab;
     public int menu_buffer_max { get; private set; }
-    public List<Button> menu_list { get; private set; }
+    public List<Button> menu_list { get; private set; } = new List<Button>();
     public Vector3 menu_start;
     public Vector3 menu_gap;
     private bool menu_activated = false;
@@ -50,7 +50,7 @@ public class ChannelButton : MonoBehaviour
     void Awake()
     {
         menu_buffer_max = 6;
-        menu_list = new List<Button>();
+        //menu_list = new List<Button>();
 
         menu_start = new Vector3(0, -80, 0);
         menu_gap = new Vector3(0, -60, 0);
@@ -87,11 +87,14 @@ public class ChannelButton : MonoBehaviour
 
     void resetButton()
     {
-        menu_list = new List<Button>();
         btn_selected = false;
         menu_activated = false;
         menuTree = null;
         button_image.sprite = base_image;
+        foreach (Button menu in menu_list)
+            menu.gameObject.SetActive(false);
+        //menu_list = new List<Button>();
+        menu_list.Clear();
     }
 
     public void menu_button_init()
@@ -219,8 +222,8 @@ public class ChannelButton : MonoBehaviour
 
     public async void channel_change(Channel input_channel)
     {
-        resetButton();
         channel = input_channel;
+        resetButton();
         await channel_image_update();
         channel_menu_update();
     }

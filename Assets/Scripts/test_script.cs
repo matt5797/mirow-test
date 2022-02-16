@@ -147,7 +147,7 @@ public class test_script : MonoBehaviour
     public async void area_get_test()
     {
         JObject result = null;
-        result = await AWS.AWSManager.instance.areaGetAsync(126.7335, 37.3402, range: 0.0035);
+        result = await AWS.AWSManager.instance.areaGetAsync(126.7335f, 37.3402f, range: 0.0035f);
         Debug.Log(result);
     }
 }

@@ -121,10 +121,10 @@ public class AreaManager : MonoBehaviour
         return distance;
     }
 
-    public async void channel_list_update(double last_Lat, double last_Long, double range=0.0035)
+    public async void channel_list_update(float last_Lat, float last_Long, float range=0.0035f, int limit=20)
     {
         List<string> channel_list = new List<string>();
-        JObject result = await AWS.AWSManager.instance.areaGetAsync(last_Lat, last_Long, range: range);
+        JObject result = await AWS.AWSManager.instance.areaGetAsync(last_Lat, last_Long, range: range, limit: limit);
         foreach (JToken row in result["body"])
         {
             channel_list.Add(row[1].ToString());

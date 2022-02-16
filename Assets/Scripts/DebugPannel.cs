@@ -39,7 +39,11 @@ public class DebugPannel : MonoBehaviour
 
     public void test_gps_change()
     {
-        AreaManager.instance.channel_list_update(126.7335, 37.3402);
+        AreaManager.instance.channel_list_update(126.7335f, 37.3402f, limit:3);
+    }
+    public void test_priority_change()
+    {
+        ChannelManager.ChannelManager.instance.channel_priority_change("f32db066-ff35-4b0a-97f4-264a46377bfa", 300);
     }
 
     public void button_all_set_active(bool acive)
@@ -94,7 +98,6 @@ public class DebugPannel : MonoBehaviour
             {
                 responseFromServer = reader.ReadToEnd();
             }
-
         }
         catch (Exception e)
         {
