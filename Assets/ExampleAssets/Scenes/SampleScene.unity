@@ -514,9 +514,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1605382343}
-        m_TargetAssemblyTypeName: debug_pannel, Assembly-CSharp
-        m_MethodName: test_gps_change
+      - m_Target: {fileID: 1605382344}
+        m_TargetAssemblyTypeName: test_script, Assembly-CSharp
+        m_MethodName: test
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -6799,7 +6799,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\uD14C\uC2A4\uD2B8 GPS \uBCC0\uACBD"
+  m_Text: 
 --- !u!222 &443559087
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -7323,7 +7323,9 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\uCC44\uB110 \uC6B0\uC120\uB3C4 \uBCC0\uACBD"
+  m_Text: '
+
+'
 --- !u!222 &821500022
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -8064,7 +8066,6 @@ MonoBehaviour:
   last_Long: 0
   current_Lat: 0
   current_Long: 0
-  update_distance: 0
   maxWait: 0
   updateWait: 0
 --- !u!4 &1249995843
@@ -8511,19 +8512,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1531685547}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1605382343}
-        m_TargetAssemblyTypeName: DebugPannel, Assembly-CSharp
-        m_MethodName: test_priority_change
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &1531685547
 MonoBehaviour:
   m_ObjectHideFlags: 0
